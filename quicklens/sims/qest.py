@@ -149,12 +149,11 @@ class library():
                 self.qrs[(ke,ks)] = ret
             return self.qrs[(ke,ks)]
 
-    def get_qr_full_sky(self, ke, ks=None, beam_fwhm_rad=10.0, lmax=3000):
+    def get_qr_full_sky(self, ke, ks=None, beam_fwhm_arcmin=10.0, lmax=3000, lcut=None, nlev=0.0):
         """ By A.Baleato.
                 ke = estimator key.
                 (optional) ks = source key (defaults to ke).
         """
-        print 'ooo'
         if ks == None:
             ks = ke
 
@@ -179,14 +178,14 @@ class library():
             
         else: # keys for both the estimator and source. need to expand.
             if (ke,ks) not in self.qrs.keys():
-                tfl1 = self.get_fl_full_sky('cltt', beam_fwhm_rad, lmax=lmax)
-                efl1 = self.get_fl_full_sky('clee', beam_fwhm_rad, lmax=lmax)
-                bfl1 = self.get_fl_full_sky('clbb', beam_fwhm_rad, lmax=lmax)
+                tfl1 = self.get_fl_full_sky('cltt', beam_fwhm_arcmin, lmax, lcut, nlev)
+                efl1 = self.get_fl_full_sky('clee', beam_fwhm_arcmin, lmax, lcut, nlev)
+                bfl1 = self.get_fl_full_sky('clbb', beam_fwhm_arcmin, lmax, lcut, nlev)
                 if self.ivfs2 is not self.ivfs1:
                     # This if statement is useless unless modified
-                    tfl1 = self.get_fl_full_sky('cltt', beam_fwhm_rad, lmax=lmax)
-                    efl1 = self.get_fl_full_sky('clee', beam_fwhm_rad, lmax=lmax)
-                    bfl1 = self.get_fl_full_sky('clbb', beam_fwhm_rad, lmax=lmax)
+                    tfl1 = self.get_fl_full_sky('cltt', beam_fwhm_arcmin, lmax, lcut, nlev)
+                    efl1 = self.get_fl_full_sky('clee', beam_fwhm_arcmin, lmax, lcut, nlev)
+                    bfl1 = self.get_fl_full_sky('clbb', beam_fwhm_arcmin, lmax, lcut, nlev)
                 else:
                     tfl2, efl2, bfl2 = tfl1, efl1, bfl1
                 
@@ -205,35 +204,27 @@ class library():
                 self.qrs[(ke,ks)] = ret
             return self.qrs[(ke,ks)]
 
-    def get_fl_full_sky(self, which_cl, beam_fwhm_rad, lmax=3000):
-        '''By ABL. IVF and deconvolution. mimics what is done in ivf.py'''
-        print 'yo'
-        #beam_size_arcmin = beam_fwhm_rad * 180./np.pi *60.0 #hp.pixelfunc.nside2resol(nside, arcmin=True) #arcmin
-        #beam = self.bl(beam_size_arcmin, lmax)**2
+    def get_fl_full_sky(which_cl, beam_fwhm_arcmin, lmax, lcut=None, nlev=0.0):
+        '''By ABL. Inverse-variance filtering. Mimics what's done in ivf.py'''
+        nl = (np.pi/180./60.*nlev)**2 / ql.spec.bl(beam_fwhm_arcmin, lmax)**2
 
-        lmax_v2 = self.cl_len.ls[-1]
+        lmax_v2 = cl_len.ls[-1]
         assert lmax==lmax_v2
-        #Should I also include beam deconvolution in this? NO!!!!
         if which_cl=='cltt':
-            #Convert the Cl to K bc thats what the sims are in
-            cl_in_K = self.cl_len.cltt
+            cl_in_K = cl_len.cltt + nl
         elif which_cl=='clee':
-            cl_in_K = self.cl_len.clee
+            cl_in_K = cl_len.clee + nl
         elif which_cl=='clbb':
-            cl_in_K = self.cl_len.clbb
+            cl_in_K = cl_len.clbb + nl
         else:
-            print 'Error!!'
+            print('Error!!')
         fl = 1./cl_in_K
         fl[0:2] = 0
+        if lcut is None:
+            pass
+        else:
+            fl[0:int(lcut)] = 0
         return fl
-
-    def bl(self, fwhm_arcmin, lmax):
-        """ Put here by ABL. returns the map-level transfer function for a symmetric Gaussian beam.
-            * fwhm_arcmin      = beam full-width-at-half-maximum (fwhm) in arcmin.
-            * lmax             = maximum multipole.
-        """
-        ls = np.arange(0, lmax+1)
-        return np.exp( -(fwhm_arcmin * np.pi/180./60.)**2 / (16.*np.log(2.)) * ls*(ls+1.) )
 
     def get_qft(self, k, tft1, eft1, bft1, tft2, eft2, bft2):
         """ return the estimate for key k.
