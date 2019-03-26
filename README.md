@@ -1,13 +1,13 @@
 This repository is a copy of D.Hanson's [Quicklens code](https://github.com/dhanson/quicklens) after correcting the two critical bugs listed below:
 
-### Fixed bugs
-1. Spherical harmonic transforms for fields with non-zero spin
+# Fixed bugs
+### 1) Spherical harmonic transforms for fields with non-zero spin
 
 Faulty functions: shts/__init__.map2vlm() and shts/__init__.vlm2map()
 
 What we were seeing was that, while the TT full-sky reconstruction worked fine, things went wrong pretty dramatically as soon as you tried to incorporate polarisation fields. We seem to have tracked this down to a bug in the functions that convert between real space fields and their spin-s spherical harmonic representation. In particular, it appears that the issue had to do with how {s}_Y_{lm} was manipulated when s<0 to avoid feeding the fortran module actually doing the transformation a negative spin. The bug was harmless when s=0, so temperature worked fine. 
 
-2. Simulation of TEB fields in the flat-sky limit
+### 2) Simulation of TEB fields in the flat-sky limit
 
 Faulty function: sims/sims.tebfft()
 
