@@ -1,63 +1,10 @@
-quicklens
-=====
+This repository is a copy of D.Hanson's [Quicklens code](https://github.com/dhanson/quicklens) after correcting the two critical bugs listed below:
 
-This package contains code for generating simulated CMB maps with 
-lensing effects, as well as estimating the lensing potential from 
-an observed sky. It has routines for:
-     * simulating lensed and unlensed CMB maps in both the 
-       full (curved sky) case, as well as the flat-sky limit.
-     * inverse-variance filtering a flat sky map, to downweight 
-       noisy modes for power spectrum or n-point function analysis. 
-     * running the full suite of temperature+polarization quadratic 
-       estimators on a filtered sky map (as well as a framework for 
-       easily implementing other quadratic anisotropy estimators).
+### Fixed bugs
+1. Spherical harmonic transforms for fields with non-zero spin
 
-The focus for estimators is on quick, flat-sky routines, however 
-code for evaluating full-sky estimators and their noise spectra 
-is included as well.
+What we were seeing was that, while the TT full-sky reconstruction worked fine, things went wrong pretty dramatically as soon as you tried to incorporate polarisation fields. We seem to have tracked this down to a bug in the functions that convert between real space fields and their spin-s spherical harmonic representation. In particular, it appears that the issue had to do with how {s}_Y_{lm} was manipulated when s<0 to avoid feeding the fortran module actually doing the transformation a negative spin. The bug was harmless when s=0, so temperature worked fine. 
 
-Scripts in the 'examples' directory give quick demonstrations of 
-major use cases. Primary examples include:
+2. Simulation of TEB fields in the flat-sky limit
 
-     * examples/plot_lens_reconstruction_noise_levels.py
-        Plot lens reconstruction noise power spectra for the 
-	TT, EE, TE, TB and EB estimators, assuming a toy 
-	experiment with Gaussian beam and white instrumental noise. 
-	Plots are made for both full-sky and flat-sky calculations 
-	for comparison.
-       
-     * examples/cinv/test_cinv_teb.py
-	Run an inverse-variance filtering operation on a flat-sky 
-	map using preconditioned congjugate descent.
-
-     * examples/lens/make_lensed_map_flat_sky.py
-        Generate a set of lensed CMB maps in the flat-sky limit.
-
-     * examples/lens/make_lensing_estimators.py
-        Runs a set of quadratic CMB lensing estimators on lensed 
-	maps, and plots their power spectra as well as cross-
-	correlation with the input lensing potential.
-
-This code has the following dependencies:
-     * numpy (required)
-     * scipy (optional, used for smoothing in 
-       	     one of the plotting routines)
-     * pypar (optional, used for coordinating parallel 
-       	     generation of simulations and lensing analysis). 
-
-The code can be run either from this directory, or installed by 
-running "python setup.py install".
-
-The code is primarily written in Python, although some low level 
-spherical harmonic transform (SHT) routines are written in Fortran 
-for speed. In order to use these SHT routines, the code must be 
-comiled. This is done automatically when installing, however if 
-running the code without installing it needs to be built with
-
-"python setup.py build_ext --inplace"
-
-Depending on system, you may need to specify a fortran compiler. 
-For example
-
-"python setup.py build_ext --inplace --fcompiler=gnu95"
-
+The bug would have appeared if you ever used it to simulate flat-sky fields: the function ql.sims.tebfft() can be used to generate realizations of size (nx,ny) of real TEB fields by drawing complex Fourier coefficients with the right power spectrum on a Fourier-space grid of size (nx, ny/2+1). However, the implementation forgets to set the strip (lx=0,ly<0) to the complex conjugate of the (lx=0, ly>0) entries. One manifestation of this bug is that the lensed simulations you generate will lack power, with the shortage being most acute on large scales. 
