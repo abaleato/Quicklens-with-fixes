@@ -26,6 +26,15 @@ import pylab as pl
 import util
 import maps
 
+def deconvolve_beam_from_alms(alm_array, beam_fwhm_arcmin, lmax):
+    '''By A.Baleato. Deconvolve beam from alm's.'''
+    beam = bl(beam_fwhm_arcmin, lmax)
+    if beam_fwhm_arcmin == 0.0:
+        return alm_array
+    else:
+        import healpy
+        return hp.sphtfunc.almxfl(alm_array, 1./beam)
+
 def bl(fwhm_arcmin, lmax):
     """ returns the map-level transfer function for a symmetric Gaussian beam.
          * fwhm_arcmin      = beam full-width-at-half-maximum (fwhm) in arcmin.
