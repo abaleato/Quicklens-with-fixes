@@ -65,6 +65,11 @@ def tebfft(pix, tcl):
     efft[0,0] = np.sqrt(2.) * np.real(efft[0,0])
     bfft[0,0] = np.sqrt(2.) * np.real(bfft[0,0])
 
+    #The following 3 lines were introduced by A.Baleato to fix a bug in the original.
+    tfft[ny/2+1:, 0] = np.conj( tfft[1:ny/2,0][::-1] )
+    efft[ny/2+1:, 0] = np.conj( efft[1:ny/2,0][::-1] )
+    bfft[ny/2+1:, 0] = np.conj( bfft[1:ny/2,0][::-1] )
+
     teb       = maps.tebfft( nx, dx, [tfft, efft, bfft], ny=ny, dy=dy )
     return spec.clmat_teb(tcl).cholesky() * teb
 
