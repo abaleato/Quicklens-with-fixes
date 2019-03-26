@@ -20,6 +20,12 @@ import pickle as pk
 import quicklens as ql
 import util
 
+def ivf_alm_array(alm_array, which_cl, beam_fwhm_arcmin, lmax, lcut=None, nlev=0.0):
+    '''By A. Baleato. Inverse-variance filter an array of alm's'''
+    import healpy
+    fl = ql.sims.qest.get_fl_full_sky(which_cl, beam_fwhm_arcmin, lmax, lcut, nlev)
+    return hp.sphtfunc.almxfl(alm_array, fl)
+
 class library(object):
     """ base class for inverse-variance filtered objects. """
     def __init__(self, obs_lib, lib_dir=None):
