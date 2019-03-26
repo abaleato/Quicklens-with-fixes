@@ -27,8 +27,8 @@ def vlm2map(s, tht, phi, vlm):
     if s < 0:
         vlmn = vlm.copy()
         for l in xrange(0,lmax+1):
-            vlmn[l**2:(l+1)**2] = vlmn[l**2:(l+1)**2][::-1] * (-1)**(np.arange(-l, l+1.) )
-        ret = -fsht.vlm2map(lmax, -s, tht, -np.array(phi), vlmn)
+            vlmn[l**2:(l+1)**2] *= (-1)**l
+        ret = fsht.vlm2map(lmax, -s, np.pi - tht, np.pi + np.array(phi), vlmn)
 
     else:
         ret = fsht.vlm2map(lmax, s, tht, phi, vlm)
@@ -47,10 +47,10 @@ def map2vlm(lmax, s, tht, phi, mp):
     assert( mp.shape == (len(tht), len(phi)) )
 
     if s < 0:
-        ret = -fsht.map2vlm(lmax, -s, tht, -np.array(phi), mp)
+        ret = fsht.map2vlm(lmax, -s, np.pi - tht, np.pi + np.array(phi), mp)
 
         for l in xrange(0,lmax+1):
-            ret[l**2:(l+1)**2] = ret[l**2:(l+1)**2][::-1] * (-1)**(np.arange(-l, l+1.) )
+            ret[l**2:(l+1)**2] *= (-1)**l
     else:
         ret = fsht.map2vlm(lmax, s, tht, phi, mp)
 
