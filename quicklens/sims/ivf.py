@@ -20,12 +20,6 @@ import pickle as pk
 import quicklens as ql
 import util
 
-def ivf_alm_array(alm_array, which_cl, beam_fwhm_arcmin, lmax, lcut=None, nlev=0.0):
-    '''By A. Baleato. Inverse-variance filter an array of alm's'''
-    import healpy
-    fl = ql.sims.qest.get_fl_full_sky(which_cl, beam_fwhm_arcmin, lmax, lcut, nlev)
-    return hp.sphtfunc.almxfl(alm_array, fl)
-
 class library(object):
     """ base class for inverse-variance filtered objects. """
     def __init__(self, obs_lib, lib_dir=None):
@@ -140,6 +134,49 @@ class library_diag(library):
     def get_sim_teb(self, idx):
         ret = (self.obs_lib.get_sim_tqu(idx) * self.mask).get_teb() * self.tl
         return ret * self.get_fl()
+
+class library_diag_full_sky(library):
+    """ By A.Baleato. A simple inverse-variance filter for curved-sky reconstruction which is (nearly) diagonal in Fourier space
+    """
+    def __init__(self, cl, transf, nlev_t=0., nlev_p=0., lcut=None, mask=None):
+        """ initialize the diagonal filter library.
+                cl      = spec.clmat_teb object containing the theory sky power spectra.
+                transf  = spec.clmat_teb object containing the beam+filtering+pixelization transfer function.
+                (optional) nlev_X = map white noise level to use in filtering (in uK.arcmin).
+                lcut = Minimum ell cutoff to impose on B-modes to avoid bias when delensing with EB reconstruction.
+        """
+        self.cl     = cl
+        self.transf = transf
+        self.nlev_t = nlev_t
+        self.nlev_p = nlev_p
+
+        self.tl = self.transf.inverse()
+        self.nl = ql.spec.clmat_teb(ql.util.dictobj( {'lmax' : self.cl.lmax,
+                                                      'cltt' : np.ones(self.cl.lmax+1) * (np.pi/180./60.*self.nlev_t)**2 ,
+                                                      'clee' : np.ones(self.cl.lmax+1) * (np.pi/180./60.*self.nlev_p)**2 ,
+                                                      'clbb' : np.ones(self.cl.lmax+1) * (np.pi/180./60.*self.nlev_p)**2 }))
+        
+        self.fl = (self.cl + (self.tl * self.tl * self.nl)).inverse()
+            
+    def get_fl_full_sky(self):
+        return self.fl.clmat
+
+    def ivf_alm_array(self, alm_array, which_cl, lcut=None):
+        '''Inverse-variance filter an array of alm's'''
+        import healpy
+        if which_cl == 'cltt':
+            index = 0
+        elif which_cl == 'clee':
+            index = 1
+        elif which_cl == 'clbb':
+            index = 2
+        fl_to_return = self.fl.clmat[:,index,index]
+        fl_to_return[0:2] = 0
+        if lcut is None:
+            pass
+        else:
+            fl_to_return[0:int(lcut)] = 0
+        return hp.sphtfunc.almxfl(alm_array, fl_to_return)
 
 class library_l_mask(library):
     """ a simple wrapper around another inverse-variance filter library which applies a multipole mask in Fourier space. """
