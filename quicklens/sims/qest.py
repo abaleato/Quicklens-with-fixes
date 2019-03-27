@@ -149,11 +149,11 @@ class library():
                 self.qrs[(ke,ks)] = ret
             return self.qrs[(ke,ks)]
 
-    def get_qr_full_sky(self, ke, ks=None, beam_fwhm_arcmin=10.0, lmax=3000, lcut=None, nlev=0.0):
-        """ By A.Baleato.
+    def get_qr_full_sky(self, ke, ks=None):
+        ''' By A.Baleato.
                 ke = estimator key.
                 (optional) ks = source key (defaults to ke).
-        """
+        '''
         if ks == None:
             ks = ke
 
@@ -178,14 +178,14 @@ class library():
             
         else: # keys for both the estimator and source. need to expand.
             if (ke,ks) not in self.qrs.keys():
-                tfl1 = self.get_fl_full_sky('cltt', beam_fwhm_arcmin, lmax, lcut, nlev)
-                efl1 = self.get_fl_full_sky('clee', beam_fwhm_arcmin, lmax, lcut, nlev)
-                bfl1 = self.get_fl_full_sky('clbb', beam_fwhm_arcmin, lmax, lcut, nlev)
+                tfl1 = self.ivfs1.get_fl_full_sky()[:,0,0]
+                efl1 = self.ivfs1.get_fl_full_sky()[:,1,1]
+                bfl1 = self.ivfs1.get_fl_full_sky()[:,2,2]
                 if self.ivfs2 is not self.ivfs1:
                     # This if statement is useless unless modified
-                    tfl1 = self.get_fl_full_sky('cltt', beam_fwhm_arcmin, lmax, lcut, nlev)
-                    efl1 = self.get_fl_full_sky('clee', beam_fwhm_arcmin, lmax, lcut, nlev)
-                    bfl1 = self.get_fl_full_sky('clbb', beam_fwhm_arcmin, lmax, lcut, nlev)
+                    tfl1 = self.ivfs2.get_fl_full_sky()[:,0,0]
+                    efl1 = self.ivfs2.get_fl_full_sky()[:,1,1]
+                    bfl1 = self.ivfs2.get_fl_full_sky()[:,2,2]
                 else:
                     tfl2, efl2, bfl2 = tfl1, efl1, bfl1
                 
@@ -203,28 +203,6 @@ class library():
                             ret += self.get_qr_full_sky( (qe,f12,f1,f2), ks=tqs ) * tfe * tfs
                 self.qrs[(ke,ks)] = ret
             return self.qrs[(ke,ks)]
-
-    def get_fl_full_sky(which_cl, beam_fwhm_arcmin, lmax, lcut=None, nlev=0.0):
-        '''By ABL. Inverse-variance filtering. Mimics what's done in ivf.py'''
-        nl = (np.pi/180./60.*nlev)**2 / ql.spec.bl(beam_fwhm_arcmin, lmax)**2
-
-        lmax_v2 = cl_len.ls[-1]
-        assert lmax==lmax_v2
-        if which_cl=='cltt':
-            cl_in_K = cl_len.cltt + nl
-        elif which_cl=='clee':
-            cl_in_K = cl_len.clee + nl
-        elif which_cl=='clbb':
-            cl_in_K = cl_len.clbb + nl
-        else:
-            print('Error!!')
-        fl = 1./cl_in_K
-        fl[0:2] = 0
-        if lcut is None:
-            pass
-        else:
-            fl[0:int(lcut)] = 0
-        return fl
 
     def get_qft(self, k, tft1, eft1, bft1, tft2, eft2, bft2):
         """ return the estimate for key k.
