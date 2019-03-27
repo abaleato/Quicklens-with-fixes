@@ -15,6 +15,6 @@ The bug would have appeared if you ever used it to simulate flat-sky fields: the
 
 # Added curved-sky functions
 
-Location: sims/qest.py
+Location: sims/ivf.py and sims/qest.py.
 
-Added get_qft_full_sky() and get_qr_full_sky() which enable curved-sky lensing recosntruction based on the quadratic estimators implemented by Hanson. IMPORTANT NOTE: the implementation of get_qr_full_sky() is very preliminary as it currently only works on signal-only fields with no other realistic effects.
+Added ivf.library_diag_full_sky(), qest.get_qft_full_sky() and qest.get_qr_full_sky() which enable inverse-variance filtering and lensing reconstruction on the curved-sky based on the quadratic estimators implemented by Hanson.
