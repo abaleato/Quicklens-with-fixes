@@ -9,6 +9,7 @@
 import numpy as np
 import qest
 
+
 class phi_TT(qest.qest):
     """ temperature-temperature (TT) lensing potential gradient-mode estimator. """
     def __init__(self, cltt):
