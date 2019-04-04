@@ -1,4 +1,4 @@
-This repository is a copy of D.Hanson's [Quicklens code](https://github.com/dhanson/quicklens) after correcting the two critical bugs listed below:
+This repository is a copy of D.Hanson's [Quicklens code](https://github.com/dhanson/quicklens) after correcting the two items listed below:
 
 # Fixed bugs
 ### 1) Spherical harmonic transforms for fields with non-zero spin
@@ -12,3 +12,9 @@ What we were seeing was that, while the TT full-sky reconstruction worked fine, 
 Faulty function: sims/sims.tebfft()
 
 The bug would have appeared if you ever used it to simulate flat-sky fields: the function ql.sims.tebfft() can be used to generate realizations of size (nx,ny) of real TEB fields by drawing complex Fourier coefficients with the right power spectrum on a Fourier-space grid of size (nx, ny/2+1). However, the implementation forgets to set the strip (lx=0,ly<0) to the complex conjugate of the (lx=0, ly>0) entries. One manifestation of this bug is that the lensed simulations you generate will lack power, with the shortage being most acute on large scales. 
+
+# Added curved-sky functions
+
+Location: sims/ivf.py and sims/qest.py.
+
+Added ivf.library_diag_full_sky(), qest.get_qft_full_sky() and qest.get_qr_full_sky() which enable inverse-variance filtering and lensing reconstruction on the curved-sky based on the quadratic estimators implemented by Hanson.

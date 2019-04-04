@@ -149,6 +149,61 @@ class library():
                 self.qrs[(ke,ks)] = ret
             return self.qrs[(ke,ks)]
 
+    def get_qr_full_sky(self, ke, ks=None):
+        ''' By A.Baleato.
+                ke = estimator key.
+                (optional) ks = source key (defaults to ke).
+        '''
+        if ks == None:
+            ks = ke
+
+        if (isinstance(ke, tuple) and isinstance(ks, tuple)): # a (qest.qest, scaling) pair for both estimator and source keys.
+            qe, f12, f1, f2 = ke
+            qs, f34 = ks
+
+            if f12 == f34:
+                ret = np.zeros(self.cl_len.ls.shape)#length lmax+1, see what qe_cov_fill_helper_fullsky takes in. #ql.maps.cfft(f1.nx, f1.dx, ny=f1.ny, dy=f1.dy)
+                return qe.fill_resp( qs, ret, f1, f2, npad=self.npad)
+            else:
+                #We don't foresee using ke!=ks, so I'm not completely sure about the modification below. It probably won't be used, anyway.
+                return np.zeros(self.cl_len.ls.shape)
+
+        elif isinstance(ke, tuple): # a (qest.qest, scaling) pair only for the estimator. need to expand the source key.
+            qe, f12, f1, f2 = ke
+            
+            ret = np.zeros(self.cl_len.ls.shape) #ql.maps.cfft(f1.nx, f1.dx, ny=f1.ny, dy=f1.dy)
+            for (tqs, tfs) in self.get_qe(ks):
+                ret += self.get_qr_full_sky( ke, ks=tqs) * tfs
+            return ret
+            
+        else: # keys for both the estimator and source. need to expand.
+            if (ke,ks) not in self.qrs.keys():
+                tfl1 = self.ivfs1.get_fl_full_sky()[:,0,0]
+                efl1 = self.ivfs1.get_fl_full_sky()[:,1,1]
+                bfl1 = self.ivfs1.get_fl_full_sky()[:,2,2]
+                if self.ivfs2 is not self.ivfs1:
+                    # This if statement is useless unless modified
+                    tfl1 = self.ivfs2.get_fl_full_sky()[:,0,0]
+                    efl1 = self.ivfs2.get_fl_full_sky()[:,1,1]
+                    bfl1 = self.ivfs2.get_fl_full_sky()[:,2,2]
+                else:
+                    tfl2, efl2, bfl2 = tfl1, efl1, bfl1
+                
+                ret = np.zeros(self.cl_len.ls.shape) #ql.maps.cfft(tfl1.nx, tfl1.dx, ny=tfl1.ny, dy=tfl1.dy)
+                for tqe, tfe in self.get_qe(ke):
+                    if not isinstance(tqe, tuple):
+                        ret += self.get_qr_full_sky( tqe, ks=ks ) * tfe
+                    else:
+                        qe, f12 = tqe
+            
+                        f1 = {'T' : tfl1, 'E' : efl1, 'B' : bfl1}[f12[0]]
+                        f2 = {'T' : tfl2, 'E' : efl2, 'B' : bfl2}[f12[1]]
+                        
+                        for (tqs, tfs) in self.get_qe(ks):
+                            ret += self.get_qr_full_sky( (qe,f12,f1,f2), ks=tqs ) * tfe * tfs
+                self.qrs[(ke,ks)] = ret
+            return self.qrs[(ke,ks)]
+
     def get_qft(self, k, tft1, eft1, bft1, tft2, eft2, bft2):
         """ return the estimate for key k.
                 k          = estimator key.
@@ -164,6 +219,26 @@ class library():
         for tqe, tfe in self.get_qe(k):
             if not isinstance(tqe, tuple):
                 ret += self.get_qft( tqe, tft1, eft1, bft1, tft2, eft2, bft2 ) * tfe
+            else:
+                (qe, f12) = tqe
+
+                f1 = {'T' : tft1, 'E' : eft1, 'B' : bft1}[f12[0]]
+                f2 = {'T' : tft2, 'E' : eft2, 'B' : bft2}[f12[1]]
+                ret += qe.eval(f1, f2, npad=self.npad) * tfe
+        return ret
+
+    def get_qft_full_sky(self, k, tft1, eft1, bft1, tft2, eft2, bft2):
+        """ By A.Baleato. return the estimate for key k.
+                k          = estimator key.
+                [t,e,b]ft1 = alm's for teb
+                [t,e,b]ft2 = ''
+                Return the vlm's.
+        """
+        lmax = len(self.cl_unl.cltt)-1
+        ret = np.zeros( (lmax+1)**2, dtype=np.complex )
+        for tqe, tfe in self.get_qe(k):
+            if not isinstance(tqe, tuple):
+                ret += self.get_qft_full_sky( tqe, tft1, eft1, bft1, tft2, eft2, bft2 ) * tfe
             else:
                 (qe, f12) = tqe
 
