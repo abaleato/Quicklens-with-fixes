@@ -17,7 +17,7 @@ import os, sys, hashlib
 import numpy  as np
 import pickle as pk
 
-imoprt healpy as hp
+import healpy as hp
 import quicklens as ql
 import util
 
