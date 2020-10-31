@@ -14,17 +14,24 @@ def configuration(parent_package='',top_path=None):
     if distutils.version.StrictVersion(np.version.version) > distutils.version.StrictVersion('1.6.1'):
         config.add_extension('shts.fsht', ['quicklens/shts/shts.f95'],
                              libraries=['gomp'], f2py_options=[],
-                             extra_f90_compile_args=['-ffixed-line-length-1000', '-fopenmp'],
-                             extra_compile_args=['-fopenmp'], extra_link_args=[],)
+                             extra_f90_compile_args=['-ffixed-line-length-1000'],#extra_f90_compile_args=['-ffixed-line-length-1000', '-fopenmp'],
+                             extra_compile_args=[], extra_link_args=[],)#extra_compile_args=['-fopenmp'], extra_link_args=[],)
     else:
         config.add_extension('shts.fsht', ['quicklens/shts/shts.f95'],
-                             libraries=['gomp'], f2py_options=[],
-                             extra_compile_args=['-fopenmp'], extra_link_args=[],)
+                             libraries=[], f2py_options=[],
+                             extra_compile_args=[], extra_link_args=[],)#extra_compile_args=['-fopenmp'], extra_link_args=[],)
 
     return config
 
 if __name__ == "__main__":
     from numpy.distutils.core import setup
+
+    # To install in Python 3
+    try:
+       from distutils.command.build_py import build_py_2to3 \
+            as build_py
+    except ImportError:
+       from distutils.command.build_py import build_py
 
     packages = ["quicklens","quicklens.cinv","quicklens.qest","quicklens.sims","quicklens.shts","quicklens.math"]
 
@@ -33,4 +40,4 @@ if __name__ == "__main__":
 
     setup(packages=packages,
           package_data=package_data,
-          configuration=configuration)
+          configuration=configuration, cmdclass = {'build_py': build_py})
