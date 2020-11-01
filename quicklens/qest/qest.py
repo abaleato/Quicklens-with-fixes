@@ -210,7 +210,7 @@ class qest(object):
         else:
             return self.eval_fullsky( barX, barY, **kwargs )
 
-    def eval_fullsky( self, barX, barY ):
+    def eval_fullsky( self, barX, barY, npad=2):
         """ evaluate this quadratic estimator on the full-sky, returning
 
         q^{XY}(L) = 1/2 \sum_{l_X} \sum_{l_Y}
