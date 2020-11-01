@@ -17,7 +17,7 @@ import os, sys, hashlib
 import numpy  as np
 import pickle as pk
 
-import healpy as hp
+#import healpy as hp
 import quicklens as ql
 import util
 
@@ -164,7 +164,6 @@ class library_diag_full_sky(library):
 
     def ivf_alm_array(self, alm_array, which_cl, lcut=None):
         '''Inverse-variance filter an array of alm's'''
-        import healpy
         if which_cl == 'cltt':
             index = 0
         elif which_cl == 'clee':
@@ -177,7 +176,7 @@ class library_diag_full_sky(library):
             pass
         else:
             fl_to_return[0:int(lcut)] = 0
-        return hp.sphtfunc.almxfl(alm_array, fl_to_return)
+        return #hp.sphtfunc.almxfl(alm_array, fl_to_return)
 
 class library_l_mask(library):
     """ a simple wrapper around another inverse-variance filter library which applies a multipole mask in Fourier space. """

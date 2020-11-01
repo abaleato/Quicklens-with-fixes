@@ -152,7 +152,7 @@ def qe_cov_fill_helper_fullsky( qeXY, qeZA, ret, fX, fY, switch_ZA=False, conj_Z
                 cl2[tl2] = qeXY.wl[i][1](tl2) * cfunc_ZA( qeZA.wl[j][i2_ZA](tl2) ) * (2.*tl2+1.) * fY[tl2]
 
             # transform l1 and l2 parts to position space
-            glq = math.wignerd.gauss_legendre_quadrature( (tl1max + tl2max + lmax)/2 + 1 )
+            glq = 1#math.wignerd.gauss_legendre_quadrature( (tl1max + tl2max + lmax)/2 + 1 )
             gp1 = glq.cf_from_cl( qeXY.sl[i][0], -(-1)**(conj_ZA)*qeZA.sl[j][i1_ZA], cl1 )
             gp2 = glq.cf_from_cl( qeXY.sl[i][1], -(-1)**(conj_ZA)*qeZA.sl[j][i2_ZA], cl2 )
 
@@ -231,7 +231,7 @@ class qest(object):
         lmax_Y = shts.util.nlm2lmax( len(barY) )
 
         nphi   = lmax_X+lmax_Y+lmax+1
-        glq    = math.wignerd.gauss_legendre_quadrature( (lmax_X + lmax_Y + lmax)/2 + 1 )
+        glq    = 1#math.wignerd.gauss_legendre_quadrature( (lmax_X + lmax_Y + lmax)/2 + 1 )
         tht    = np.arccos(glq.zvec)
         phi    = np.linspace(0., 2.*np.pi, nphi, endpoint=False)
 
