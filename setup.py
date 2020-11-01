@@ -26,6 +26,12 @@ def configuration(parent_package='',top_path=None):
 if __name__ == "__main__":
     from numpy.distutils.core import setup
 
+    try:
+       from distutils.command.build_py import build_py_2to3 \
+            as build_py
+    except ImportError:
+       from distutils.command.build_py import build_py
+
     packages = ["quicklens","quicklens.cinv","quicklens.qest","quicklens.sims","quicklens.shts","quicklens.math"]
 
     data_dir = os.path.join("data","cl","planck_wp_highL","*")
@@ -33,4 +39,4 @@ if __name__ == "__main__":
 
     setup(packages=packages,
           package_data=package_data,
-          configuration=configuration)
+          configuration=configuration, cmdclass = {'build_py': build_py})
