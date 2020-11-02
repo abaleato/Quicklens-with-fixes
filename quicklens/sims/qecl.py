@@ -10,7 +10,7 @@ import numpy  as np
 import pickle as pk
 
 import quicklens as ql
-import util
+from . import util
 
 class library():
     """ a library for taking the auto- or cross-spectrum of the quadratic estimator
@@ -129,10 +129,10 @@ class library():
 
     def get_qcr_lcl(self, *args, **kwargs):
         """ caching version of get_qcr, using a spec.lcl object to compress the full 2D response. """
-        tfname = self.lib_dir + ("/cache_lcl_%+d_%s.pk" % (hash(args + tuple(frozenset(kwargs.items()))), "get_qcr"))
+        tfname = self.lib_dir + ("/cache_lcl_%+d_%s.pk" % (hash(args + tuple(frozenset(list(kwargs.items())))), "get_qcr"))
         tfname = tfname.replace('+', 'p').replace('-', 'm')
         if not os.path.exists(tfname):
-            print "caching lm: %s" % tfname
+            print("caching lm: %s" % tfname)
             lm = ql.spec.lcl( self.lmax_lcl, self.get_qcr(*args, **kwargs) ) 
             pk.dump( lm, open(tfname,'w') )
         return pk.load( open(tfname,'r') )
@@ -166,10 +166,10 @@ class library():
 
     def get_sim_qcl_lcl(self, *args, **kwargs):
         """ caching version of get_sim_qcl, using a spec.lcl object to compress the full 2D response. """
-        tfname = self.lib_dir + ("/cache_lcl_%+d_%s.pk" % (hash(args + tuple(frozenset(kwargs.items()))), "get_sim_qcl"))
+        tfname = self.lib_dir + ("/cache_lcl_%+d_%s.pk" % (hash(args + tuple(frozenset(list(kwargs.items())))), "get_sim_qcl"))
         tfname = tfname.replace('+', 'p').replace('-', 'm')
         if not os.path.exists(tfname):
-            print "caching lm: %s" % tfname
+            print("caching lm: %s" % tfname)
             lm = ql.spec.lcl( self.lmax_lcl, self.get_sim_qcl(*args, **kwargs) )
             pk.dump( lm, open(tfname,'w') )
         return pk.load( open(tfname,'r') )
@@ -232,11 +232,11 @@ class library():
         if self.qeA is self.qeB:
             kA, kB = sorted([kA,kB])
 
-        tfname = self.lib_dir + ("/cache_lcl_%+d_%s.pk" % (hash( (kA,i) + tuple(frozenset({'kB' : kB}.items()))), "get_sim_ncl_lcl"))
+        tfname = self.lib_dir + ("/cache_lcl_%+d_%s.pk" % (hash( (kA,i) + tuple(frozenset(list({'kB' : kB}.items())))), "get_sim_ncl_lcl"))
         tfname = tfname.replace('+', 'p').replace('-', 'm')
                 
         if not os.path.exists(tfname):
-            print "get_sim_ncl_lcl caching lm for kA=%s, kB=%s, i=%d : %s" % (kA, kB, i, tfname)
+            print("get_sim_ncl_lcl caching lm for kA=%s, kB=%s, i=%d : %s" % (kA, kB, i, tfname))
 
             @ql.util.memoize
             def get_tebfts(i):

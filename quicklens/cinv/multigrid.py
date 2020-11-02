@@ -12,8 +12,8 @@
 import sys, os, re, glob, copy
 import numpy as np
 
-import cd_solve
-import cd_monitors
+from . import cd_solve
+from . import cd_monitors
 from .. import util
 from .. import maps
 
@@ -55,7 +55,7 @@ class chain():
 
         pre_op              = opfilt.pre_op_diag( s_inv_filt, n_inv_filt.degrade(2**nstages) )
 
-        for i in xrange(0, nstages):
+        for i in range(0, nstages):
             class slog(object):
                 def __init__(self, id, cobj):
                     self.id = 1*id

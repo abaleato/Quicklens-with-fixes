@@ -6,11 +6,11 @@
 import sys
 import numpy as np
 
-import util
+from . import util
 
 try:
     import fsht
-except ImportError, exc:
+except ImportError as exc:
     sys.stderr.write("IMPORT ERROR: " + __file__ + " ({})".format(exc) + ". Try running 'python setup.py install' or 'python setup.py build_ext --inplace' from the quicklens directory.\n")
     
 def vlm2map(s, tht, phi, vlm):
@@ -26,7 +26,7 @@ def vlm2map(s, tht, phi, vlm):
 
     if s < 0:
         vlmn = vlm.copy()
-        for l in xrange(0,lmax+1):
+        for l in range(0,lmax+1):
             vlmn[l**2:(l+1)**2] *= (-1)**l
         ret = fsht.vlm2map(lmax, -s, np.pi - tht, np.pi + np.array(phi), vlmn)
 
@@ -49,7 +49,7 @@ def map2vlm(lmax, s, tht, phi, mp):
     if s < 0:
         ret = fsht.map2vlm(lmax, -s, np.pi - tht, np.pi + np.array(phi), mp)
 
-        for l in xrange(0,lmax+1):
+        for l in range(0,lmax+1):
             ret[l**2:(l+1)**2] *= (-1)**l
     else:
         ret = fsht.map2vlm(lmax, s, tht, phi, mp)

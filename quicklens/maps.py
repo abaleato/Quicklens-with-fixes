@@ -15,8 +15,8 @@
 import hashlib
 import numpy as np
 
-import spec
-import util
+from . import spec
+from . import util
 
 class pix(object):
     def __init__(self, nx, dx, ny=None, dy=None):
@@ -104,8 +104,8 @@ class rmap(pix):
 
         ret = rmap( self.nx//fac, self.dx*fac, ny=self.ny//fac, dy=self.dy*fac )
         
-        for i in xrange(0,fac):
-            for j in xrange(0, fac):
+        for i in range(0,fac):
+            for j in range(0, fac):
                 ret.map += self.map[i::fac,j::fac]
 
         if intensive == True:
@@ -117,8 +117,8 @@ class rmap(pix):
         """ increase the size/resolution of this map by fac in each dimension. """
         ret = rmap( self.nx*fac, self.dx//fac, ny=self.ny*fac, dy=self.dy/fac )
 
-        for i in xrange(0,fac):
-            for j in xrange(0, fac):
+        for i in range(0,fac):
+            for j in range(0, fac):
                 ret.map[i::fac,j::fac] = self.map
 
         return ret
@@ -285,8 +285,8 @@ class tqumap(pix):
 
         ret = tqumap( self.nx//fac, self.dx*fac, ny=self.ny//fac, dy=self.dy*fac )
         
-        for i in xrange(0,fac):
-            for j in xrange(0, fac):
+        for i in range(0,fac):
+            for j in range(0, fac):
                 ret.tmap += self.tmap[i::fac,j::fac]
                 ret.qmap += self.qmap[i::fac,j::fac]
                 ret.umap += self.umap[i::fac,j::fac]
@@ -464,29 +464,29 @@ def make_tqumap_wt( pix, ninv=None, mask=None, ninv_dcut=None, nlev_tp=None, mas
         ret.weight[:,:,1,1] = (180.*60./np.pi)**2 * ret.dx * ret.dy / nlev_tp[1]**2
         ret.weight[:,:,2,2] = (180.*60./np.pi)**2 * ret.dx * ret.dy / nlev_tp[1]**2
 
-    for i in xrange(0,3):
-        for j in xrange(0,3):
+    for i in range(0,3):
+        for j in range(0,3):
             if (ninv_dcut != None):
-                print "cutting ", len( np.where(dets < ninv_dcut)[0] ), " pixels for det"
+                print("cutting ", len( np.where(dets < ninv_dcut)[0] ), " pixels for det")
                 ret.weight[:,:,i,j][np.where(dets < ninv_dcut)] = 0.0
 
     if mask != None:
-        for i in xrange(0,3):
-            for j in xrange(0,3):
+        for i in range(0,3):
+            for j in range(0,3):
                 ret.weight[:,:,i,j] *= mask
 
     if maskt != None:
-        for i in xrange(0,3):
+        for i in range(0,3):
             ret.weight[:,:,i,0] *= maskt
             ret.weight[:,:,0,i] *= maskt
 
     if maskq != None:
-        for i in xrange(0,3):
+        for i in range(0,3):
             ret.weight[:,:,i,1] *= maskq
             ret.weight[:,:,1,i] *= maskq
 
     if masku != None:
-        for i in xrange(0,3):
+        for i in range(0,3):
             ret.weight[:,:,i,2] *= masku
             ret.weight[:,:,2,i] *= masku
     
@@ -845,7 +845,7 @@ class rfft(pix):
             assert(0)
 
     def __rdiv__(self, other):
-        print "rfft rdiv, other = ", other
+        print("rfft rdiv, other = ", other)
         if False:
             pass
         elif np.isscalar(other):

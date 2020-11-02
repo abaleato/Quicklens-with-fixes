@@ -78,7 +78,7 @@ class dictobj(object):
         self.d = d
 
     def __getattr__(self, m):
-        if m in self.d.keys():
+        if m in list(self.d.keys()):
             return self.d.get(m)
         else:
             raise AttributeError
@@ -178,7 +178,7 @@ class jit:
 
     def instantiate(self):
         [ctype, cargs, ckwds] = self.__dict__['__jit_args']
-        print 'jit: instantiating ctype =', ctype
+        print(('jit: instantiating ctype =', ctype))
         self.__dict__['__jit_obj'] = ctype( *cargs, **ckwds )
         del self.__dict__['__jit_args']
 
@@ -261,13 +261,13 @@ try:
         out = io.BytesIO(text); out.seek(0); return np.load(out)
     sqlite3.register_converter("array", convert_array)
     
-except ImportError, exc:
+except ImportError as exc:
     sys.stderr.write("IMPORT ERROR: " + __file__ + " (" + str(exc) + ")\n")
 
 class npdb():
     """ a simple wrapper class to store numpy arrays in an sqlite3 database, indexed by an id string. """
     def __init__(self, fname):
-        import mpi
+        from . import mpi
         if (not os.path.exists(fname) and mpi.rank == 0):
             con = sqlite3.connect(fname, detect_types=sqlite3.PARSE_DECLTYPES)
             cur = con.cursor()

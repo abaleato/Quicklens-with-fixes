@@ -10,7 +10,7 @@ import numpy  as np
 import pickle as pk
 
 import quicklens as ql
-import util
+from . import util
 
 class library():
     def __init__(self, cl_unl, cl_len, ivfs1, lib_dir=None, ivfs2=None, npad=2):
@@ -97,7 +97,7 @@ class library():
 
     def get_qe(self, k):
         """ return an array of tuples (qe, scaling) defining the quadratic estimator k. """
-        if k not in self.qes.keys():
+        if k not in list(self.qes.keys()):
             self.init_q(k)
         return self.qes[k]
 
@@ -127,7 +127,7 @@ class library():
             return ret
             
         else: # keys for both the estimator and source. need to expand.
-            if (ke,ks) not in self.qrs.keys():
+            if (ke,ks) not in list(self.qrs.keys()):
                 tfl1, efl1, bfl1 = self.ivfs1.get_fl().get_cffts()
                 if self.ivfs2 is not self.ivfs1:
                     tfl2, efl2, bfl2 = self.ivfs2.get_fl().get_cffts()
@@ -177,7 +177,7 @@ class library():
             return ret
             
         else: # keys for both the estimator and source. need to expand.
-            if (ke,ks) not in self.qrs.keys():
+            if (ke,ks) not in list(self.qrs.keys()):
                 tfl1 = self.ivfs1.get_fl_full_sky()[:,0,0]
                 efl1 = self.ivfs1.get_fl_full_sky()[:,1,1]
                 bfl1 = self.ivfs1.get_fl_full_sky()[:,2,2]

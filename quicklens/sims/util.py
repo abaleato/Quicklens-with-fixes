@@ -7,8 +7,8 @@ import numpy as np
 
 def hash_check(hash1, hash2, ignore=[], keychain=[]):
     """ compare two hash dictionaries, usually produced by the .hashdict() method of a library object. """
-    keys1 = hash1.keys()
-    keys2 = hash2.keys()
+    keys1 = list(hash1.keys())
+    keys2 = list(hash2.keys())
 
     for key in ignore:
         if key in keys1: keys1.remove(key)
@@ -19,11 +19,11 @@ def hash_check(hash1, hash2, ignore=[], keychain=[]):
         v2 = hash2[key]
 
         def hashfail(msg=None):
-            print "ERROR: HASHCHECK FAIL AT KEY = " + ':'.join(keychain + [key])
+            print("ERROR: HASHCHECK FAIL AT KEY = " + ':'.join(keychain + [key]))
             if msg != None:
-                print "   ", msg
-            print "   ", "V1 = ", v1
-            print "   ", "V2 = ", v2
+                print("   ", msg)
+            print("   ", "V1 = ", v1)
+            print("   ", "V2 = ", v2)
             assert(0)
 
         if type(v1) != type(v2):

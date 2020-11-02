@@ -23,8 +23,8 @@ import os, copy, glob, hashlib
 import numpy as np
 import pylab as pl
 
-import util
-import maps
+from . import util
+from . import maps
 
 def deconvolve_beam_from_alms(alm_array, beam):
     '''By A.Baleato. Deconvolve beam from alm's.'''
@@ -146,13 +146,13 @@ class camb_clfile(object):
             ret      = copy.deepcopy(self)
             ret.lmax = lmax
             ret.ls   = np.arange(0, lmax+1)
-            for k, v in self.__dict__.items():
+            for k, v in list(self.__dict__.items()):
                 if k[0:2] == 'cl':
                     setattr( ret, k, copy.deepcopy(v[0:lmax+1]) )
 
             if lmin != None:
                 assert( lmin <= lmax )
-                for k in self.__dict__.keys():
+                for k in list(self.__dict__.keys()):
                     if k[0:2] == 'cl':
                         getattr( ret, k )[0:lmin] = 0.0
             return ret
@@ -184,7 +184,7 @@ class camb_clfile(object):
     def __eq__(self, other):
         """ compare two clfile objects. """
         try:
-            for key in self.__dict__.keys()+other.__dict__.keys():
+            for key in list(self.__dict__.keys())+list(other.__dict__.keys()):
                 if type(self.__dict__[key]) == np.ndarray:
                     assert( np.all( self.__dict__[key] == other.__dict__[key] ) )
                 else:
@@ -302,7 +302,7 @@ class bcl(object):
     def __mul__(self, fac):
         ret = copy.deepcopy(self)
 
-        for spec in ret.specs.keys():
+        for spec in list(ret.specs.keys()):
             ret.specs[spec][:] *= fac
 
         return ret
@@ -311,11 +311,11 @@ class bcl(object):
         ret = copy.deepcopy(self)
 
         if np.isscalar(other):
-            for spec in ret.specs.keys():
+            for spec in list(ret.specs.keys()):
                 ret.specs[spec][:] /= other
         elif (hasattr(other, 'lbins') and hasattr(other, 'specs')):
             assert( np.all(self.lbins == other.lbins) )
-            for spec in ret.specs.keys():
+            for spec in list(ret.specs.keys()):
                 ret.specs[spec][:] /= other.specs[spec][:]
 
         return ret
@@ -325,7 +325,7 @@ class bcl(object):
             assert( np.all(self.lbins == other.lbins) )
 
             ret = copy.deepcopy(self)
-            for spec in ret.specs.keys():
+            for spec in list(ret.specs.keys()):
                 ret.specs[spec][:] += other.specs[spec][:]
             return ret
         else:
@@ -336,7 +336,7 @@ class bcl(object):
             assert( np.all(self.lbins == other.lbins) )
 
             ret = copy.deepcopy(self)
-            for spec in ret.specs.keys():
+            for spec in list(ret.specs.keys()):
                 ret.specs[spec][:] -= other.specs[spec][:]
             return ret
         else:
@@ -344,9 +344,9 @@ class bcl(object):
 
     def __iadd__(self, other):
         assert( np.all(self.lbins == other.lbins) )
-        assert( self.specs.keys() == other.specs.keys() )
+        assert( list(self.specs.keys()) == list(other.specs.keys()) )
 
-        for spec in self.specs.keys():
+        for spec in list(self.specs.keys()):
             self.specs[spec][:] += other.specs[spec]
 
         return self
@@ -513,8 +513,8 @@ class clmat_teb(object):
             assert( (lmax+1) >= len(other) )
 
             ret = self.clone()
-            for i in xrange(0,3):
-                for j in xrange(0,3):
+            for i in range(0,3):
+                for j in range(0,3):
                     ret.clmat[:,i,j] *= other[0:lmax+1]
 
             return ret
@@ -538,14 +538,14 @@ class clmat_teb(object):
     def inverse(self):
         """ return a new clmat_teb object, containing the 3x3 matrix pseudo-inverse of this one, multipole-by-multipole. """
         ret = copy.deepcopy(self)
-        for l in xrange(0, self.lmax+1):
+        for l in range(0, self.lmax+1):
             ret.clmat[l,:,:] = np.linalg.pinv( self.clmat[l] )
         return ret
 
     def cholesky(self):
         """ return a new clmat_teb object, containing the 3x3 cholesky decomposition (or matrix square root) of this one, multipole-by-multipole. """
         ret = copy.deepcopy(self)
-        for l in xrange(0, self.lmax+1):
+        for l in range(0, self.lmax+1):
             u, t, v = np.linalg.svd(self.clmat[l])
             ret.clmat[l,:,:] = np.dot(u, np.dot(np.diag(np.sqrt(t)), v))
         return ret

@@ -60,7 +60,7 @@ def alm2vlm( glm, clm=None ):
     """ convert alm format -> vlm format coefficients. glm is gradient mode, clm is curl mode. """
     lmax = nlm2lmax(len(glm))
     ret = np.zeros( (lmax+1)**2, dtype=np.complex )
-    for l in xrange(0, lmax+1):
+    for l in range(0, lmax+1):
         ms = np.arange(1,l+1)
         ret[l*l+l]    = -glm[l]
         ret[l*l+l+ms] = -glm[ms * (2*lmax+1-ms)//2 + l]
@@ -68,7 +68,7 @@ def alm2vlm( glm, clm=None ):
 
     if clm != None:
         assert( len(clm) == len(glm) )
-        for l in xrange(0, lmax+1):
+        for l in range(0, lmax+1):
             ms = np.arange(1,l+1)
             ret[l*l+l]    += -1.j * clm[l]
             ret[l*l+l+ms] += -1.j * clm[ms * (2*lmax+1-ms)//2 + l]
@@ -83,7 +83,7 @@ def vlm2alm( vlm ):
     glm = np.zeros( lmax2nlm(lmax), dtype=np.complex )
     clm = np.zeros( lmax2nlm(lmax), dtype=np.complex )
 
-    for l in xrange(0, lmax+1):
+    for l in range(0, lmax+1):
         ms = np.arange(1,l+1)
 
         glm[l] = -vlm[l*l+l].real
@@ -104,7 +104,7 @@ def alm2rlm(alm):
     rt2 = np.sqrt(2.)
 
     rlm[l2s] = alm[ls].real
-    for m in xrange(1, lmax+1):
+    for m in range(1, lmax+1):
         rlm[l2s[m:] + 2*m - 1] = alm[m*(2*lmax+1-m)//2 + ls[m:]].real * rt2
         rlm[l2s[m:] + 2*m + 0] = alm[m*(2*lmax+1-m)//2 + ls[m:]].imag * rt2
     return rlm
@@ -122,6 +122,6 @@ def rlm2alm(rlm):
     ir2 = 1.0 / np.sqrt(2.)
 
     alm[ls] = rlm[l2s]
-    for m in xrange(1, lmax+1):
+    for m in range(1, lmax+1):
         alm[m*(2*lmax+1-m)//2 + ls[m:]] = (rlm[l2s[m:] + 2*m - 1] + 1.j * rlm[l2s[m:] + 2*m + 0]) * ir2
     return alm

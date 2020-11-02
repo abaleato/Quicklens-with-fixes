@@ -86,9 +86,9 @@ def proj_cof( d, vs, w=None ):
     n = len(vs)
     ptnd = np.zeros(n) 
     ptnp = np.zeros((n,n))
-    for i in xrange(0, n):
+    for i in range(0, n):
         ptnd[i] = np.dot( vs[i], d*w )
-        for j in xrange(0, n):
+        for j in range(0, n):
             ptnp[i,j] = np.dot( vs[i], vs[j] * w )
 
     c = np.dot( np.linalg.pinv(ptnp), ptnd )
@@ -99,7 +99,7 @@ def proj_dat( d, vs, w=None ):
     c = proj_cof( d, vs, w=w )
     
     r = np.copy(d)
-    for i in xrange(0,n):
+    for i in range(0,n):
         r -= vs[i] * c[i]
     return r
 

@@ -32,7 +32,7 @@ class cache_mem(dict):
         del self[key]
 
     def trim(self, keys):
-        assert( set(keys).issubset(self.keys()) )
+        assert( set(keys).issubset(list(self.keys())) )
         for key in (set(self.keys()) - set(keys)):
             del self[key]
 
@@ -95,7 +95,7 @@ def cd_solve(x, b, fwd_op, pre_ops, dot_op, criterion, tr=tr_cg, cache=cache_mem
         searchdirs = [pre_op(residual) for pre_op in pre_ops]
 
         # orthogonalize w.r.t. previous searches.
-        prev_iters = range( tr(it), it )
+        prev_iters = list(range( tr(it), it))
         
         for titer in prev_iters:
             [prev_dTAd_inv, prev_searchdirs, prev_searchfwds] = cache.restore(titer)
@@ -108,6 +108,6 @@ def cd_solve(x, b, fwd_op, pre_ops, dot_op, criterion, tr=tr_cg, cache=cache_mem
                     searchdir -= prev_searchdir * beta
 
         # clear old keys from cache
-        cache.trim( range( tr(it+1), it ) )
+        cache.trim( list(range( tr(it+1), it)) )
         
     return it

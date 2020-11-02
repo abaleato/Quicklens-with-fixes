@@ -15,7 +15,7 @@ import numpy as np
 import pickle as pk
 
 from .. import mpi
-import util
+from . import util
 
 class library():
     """ library for maintaining the state of the numpy random number generator. """
@@ -40,7 +40,7 @@ class library():
                 if seed != None:
                     np.random.seed(seed)
                 else:
-                    keyseed = raw_input("quicklens::sims::phas: enter several random strokes on the keyboard followed by enter to initialize the random seed.\n")
+                    keyseed = input("quicklens::sims::phas: enter several random strokes on the keyboard followed by enter to initialize the random seed.\n")
                     assert(len(keyseed) > 0)
                     #Ensure that seed is less than or equal to 2**32
                     np.random.seed(np.abs(int(hash(keyseed)))%(2**32))
@@ -62,7 +62,7 @@ class library():
     def hashdict(self):
         """ returns a dictionary which uniquely characterizes this object. """
         return { 'size' : self.size,
-                 'init' : dict( zip( np.arange(0,4), pk.load( open(self.lib_dir + "/state_%04d.pk"%0, 'r') ) ) ) }
+                 'init' : dict( list(zip( np.arange(0,4), pk.load( open(self.lib_dir + "/state_%04d.pk"%0, 'r') ) )) ) }
 
     def set_state(self, idx):
         """ set the random number generator to the state used for simulation with index 'idx'. """
@@ -74,7 +74,7 @@ class library():
             assert(mpi.rank == 0)
             state = self.get_state(idx-1)
             np.random.set_state(state)
-            print "quicklens::sims::phas: caching state %d"%idx
+            print("quicklens::sims::phas: caching state %d"%idx)
             self.random(size=self.size)
             pk.dump( np.random.get_state(), open(self.lib_dir + "/state_%04d.pk"%idx, 'w') )
         return pk.load( open(self.lib_dir + "/state_%04d.pk"%idx, 'r') )
