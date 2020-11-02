@@ -68,7 +68,7 @@ class library_flat_lensed():
 
         if self.phase == None:
             lmax = cl_unl.lmax
-            self.phase = phas.library( 8*pix.nx*(pix.ny/2+1), lib_dir = self.lib_dir + "/phase" )
+            self.phase = phas.library( 8*pix.nx*(pix.ny//2+1), lib_dir = self.lib_dir + "/phase" )
 
         if ql.mpi.rank == 0:
             if not os.path.exists(lib_dir):

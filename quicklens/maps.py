@@ -76,7 +76,7 @@ class rmap(pix):
         assert( np.mod( nyp - self.ny, 2 ) == 0 )
 
         ret = rmap( nx=nxp, dx=self.dx, ny=nyp, dy=self.dy )
-        ret.map[ (nyp-self.ny)/2:(nyp+self.ny)/2, (nxp-self.nx)/2:(nxp+self.nx)/2 ] = self.map
+        ret.map[ (nyp-self.ny)//2:(nyp+self.ny)//2, (nxp-self.nx)//2:(nxp+self.nx)//2 ] = self.map
         return ret
 
     def compatible(self, other):
@@ -102,7 +102,7 @@ class rmap(pix):
         assert( np.mod(self.nx, fac) == 0 )
         assert( np.mod(self.ny, fac) == 0 )
 
-        ret = rmap( self.nx/fac, self.dx*fac, ny=self.ny/fac, dy=self.dy*fac )
+        ret = rmap( self.nx//fac, self.dx*fac, ny=self.ny//fac, dy=self.dy*fac )
         
         for i in xrange(0,fac):
             for j in xrange(0, fac):
@@ -115,7 +115,7 @@ class rmap(pix):
 
     def prograde(self, fac):
         """ increase the size/resolution of this map by fac in each dimension. """
-        ret = rmap( self.nx*fac, self.dx/fac, ny=self.ny*fac, dy=self.dy/fac )
+        ret = rmap( self.nx*fac, self.dx//fac, ny=self.ny*fac, dy=self.dy/fac )
 
         for i in xrange(0,fac):
             for j in xrange(0, fac):
@@ -236,7 +236,7 @@ class tqumap(pix):
 
         ret = tqumap( nx=nxp, dx=self.dx, ny=nyp, dy=self.dy )
         for this, that in [ [self.tmap, ret.tmap], [self.qmap, ret.qmap], [self.umap, ret.umap] ]:
-            that[ (nyp-self.ny)/2:(nyp+self.ny)/2, (nxp-self.nx)/2:(nxp+self.nx)/2 ] = this
+            that[ (nyp-self.ny)//2:(nyp+self.ny)//2, (nxp-self.nx)//2:(nxp+self.nx)//2 ] = this
         return ret
 
     def threshold(self, vmin, vmax=None, vcut=0.):
@@ -283,7 +283,7 @@ class tqumap(pix):
         assert( np.mod(self.nx, fac) == 0 )
         assert( np.mod(self.ny, fac) == 0 )
 
-        ret = tqumap( self.nx/fac, self.dx*fac, ny=self.ny/fac, dy=self.dy*fac )
+        ret = tqumap( self.nx//fac, self.dx*fac, ny=self.ny//fac, dy=self.dy*fac )
         
         for i in xrange(0,fac):
             for j in xrange(0, fac):
@@ -504,15 +504,15 @@ class tebfft(pix):
         super( tebfft, self ).__init__(nx, dx, ny=ny, dy=dy)
 
         if ffts is None:
-            self.tfft = np.zeros( (self.ny, self.nx/2+1), dtype=np.complex )
-            self.efft = np.zeros( (self.ny, self.nx/2+1), dtype=np.complex )
-            self.bfft = np.zeros( (self.ny, self.nx/2+1), dtype=np.complex )
+            self.tfft = np.zeros( (self.ny, self.nx//2+1), dtype=np.complex )
+            self.efft = np.zeros( (self.ny, self.nx//2+1), dtype=np.complex )
+            self.bfft = np.zeros( (self.ny, self.nx//2+1), dtype=np.complex )
         else:
             [self.tfft, self.efft, self.bfft] = ffts
 
-        assert( (self.ny, self.nx/2+1) == self.tfft.shape )
-        assert( (self.ny, self.nx/2+1) == self.efft.shape )
-        assert( (self.ny, self.nx/2+1) == self.bfft.shape )
+        assert( (self.ny, self.nx//2+1) == self.tfft.shape )
+        assert( (self.ny, self.nx//2+1) == self.efft.shape )
+        assert( (self.ny, self.nx//2+1) == self.bfft.shape )
 
     def hashdict(self):
         return { 'pix'  : super(tebfft, self).hashdict(),
@@ -574,7 +574,7 @@ class tebfft(pix):
             self.bfft *= other.fft
             return self
         elif (len(getattr(other, 'shape', [])) == 1):
-            tfac = np.interp( self.get_ell().flatten(), np.arange(0, len(other)), other, right=0 ).reshape((self.ny,self.nx/2+1))
+            tfac = np.interp( self.get_ell().flatten(), np.arange(0, len(other)), other, right=0 ).reshape((self.ny,self.nx//2+1))
             self.tfft *= tfac; self.efft *= tfac; self.bfft *= tfac
             return self
         else:
@@ -589,7 +589,7 @@ class tebfft(pix):
                                  self.bfft * other],
                            ny=self.ny, dy=self.dy )
         elif (type(other) == np.ndarray) and (len(getattr(other, 'shape', [])) == 1):
-            tfac = np.interp( self.get_ell().flatten(), np.arange(0, len(other)), other, right=0 ).reshape((self.ny,self.nx/2+1))
+            tfac = np.interp( self.get_ell().flatten(), np.arange(0, len(other)), other, right=0 ).reshape((self.ny,self.nx//2+1))
             return tebfft( self.nx, self.dx,
                            ffts=[self.tfft * tfac,
                                  self.efft * tfac,
@@ -674,13 +674,13 @@ class tebfft(pix):
         """ reduce the resolution of this map by a factor fac. """
         assert( np.mod(self.nx, fac) == 0 )
         assert( np.mod(self.ny, fac) == 0 )
-        assert( np.mod(self.nx/fac, 2) == 0 )
+        assert( np.mod(self.nx//fac, 2) == 0 )
 
-        return tebfft( nx=self.nx/fac, dx=self.dx*fac,
-                       ffts = [ self.tfft[0:self.ny/fac,0:self.nx/fac/2+1],
-                                self.efft[0:self.ny/fac,0:self.nx/fac/2+1],
-                                self.bfft[0:self.ny/fac,0:self.nx/fac/2+1] ],
-                       ny=self.ny/fac, dy=self.dy*fac )
+        return tebfft( nx=self.nx//fac, dx=self.dx*fac,
+                       ffts = [ self.tfft[0:self.ny//fac,0:self.nx//fac//2+1],
+                                self.efft[0:self.ny//fac,0:self.nx//fac//2+1],
+                                self.bfft[0:self.ny//fac,0:self.nx//fac//2+1] ],
+                       ny=self.ny//fac, dy=self.dy*fac )
 
     def get_pix_transf(self):
         """ return the FFT describing the map-level transfer function for the pixelization of this object. """
@@ -717,7 +717,7 @@ class tebfft(pix):
 
     def get_lxly(self):
         """ returns the (lx, ly) pair associated with each Fourier mode in T, E, B. """
-        return np.meshgrid( np.fft.fftfreq( self.nx, self.dx )[0:self.nx/2+1]*2.*np.pi,
+        return np.meshgrid( np.fft.fftfreq( self.nx, self.dx )[0:self.nx//2+1]*2.*np.pi,
                             np.fft.fftfreq( self.ny, self.dy )*2.*np.pi )
 
     def get_ell(self):
@@ -785,7 +785,7 @@ def is_rfft(obj):
              hasattr(obj, 'ny') and hasattr(obj, 'dy') and
              hasattr(obj, 'fft')  ): return False
 
-    return obj.fft.shape == (obj.nx, obj.ny/2+1)
+    return obj.fft.shape == (obj.nx, obj.ny//2+1)
 
 class rfft(pix):
     def __init__(self, nx, dx, fft=None, ny=None, dy=None):
@@ -793,10 +793,10 @@ class rfft(pix):
         super( rfft, self ).__init__(nx, dx, ny=ny, dy=dy)
 
         if fft is None:
-            fft = np.zeros( (self.ny, self.nx/2+1), dtype=np.complex )
+            fft = np.zeros( (self.ny, self.nx//2+1), dtype=np.complex )
         self.fft = fft
 
-        assert( (self.ny, self.nx/2+1) == self.fft.shape )
+        assert( (self.ny, self.nx//2+1) == self.fft.shape )
 
     def __iadd__(self, other):
         if False:
@@ -912,15 +912,15 @@ class rfft(pix):
     def get_cfft( self ):
         """ return the complex FFT. """
         fft = np.zeros( (self.ny, self.nx), dtype=np.complex )
-        fft[:,0:(self.nx/2+1)] = self.fft[:,:]
-        fft[0,(self.nx/2+1):]  = np.conj(self.fft[0,1:self.nx/2][::-1])
-        fft[1:,(self.nx/2+1):]  = np.conj(self.fft[1:,1:self.nx/2][::-1,::-1])
+        fft[:,0:(self.nx//2+1)] = self.fft[:,:]
+        fft[0,(self.nx//2+1):]  = np.conj(self.fft[0,1:self.nx//2][::-1])
+        fft[1:,(self.nx//2+1):]  = np.conj(self.fft[1:,1:self.nx//2][::-1,::-1])
 
         return cfft( self.nx, self.dx, fft=fft, ny=self.ny, dy=self.dy )
 
     def get_lxly(self):
         """ returns the (lx, ly) pair associated with each Fourier mode in T, E, B. """
-        return np.meshgrid( np.fft.fftfreq( self.nx, self.dx )[0:self.nx/2+1]*2.*np.pi,
+        return np.meshgrid( np.fft.fftfreq( self.nx, self.dx )[0:self.nx//2+1]*2.*np.pi,
                             np.fft.fftfreq( self.ny, self.dy )*2.*np.pi )
 
     def get_ell(self):

@@ -28,8 +28,8 @@ def cls2vlm( clgg, clcc=None, clgc=None, rand=np.random.standard_normal ):
     clgg_inv = np.zeros( len(clgg) )
     clgg_inv[ np.where(clgg != 0) ] = 1./clgg[ np.where(clgg != 0) ]
 
-    ms = (np.ceil(((2*lmax+1)-np.sqrt((2*lmax+1)**2-8*(np.arange( 0, lmax2nlm(lmax) )-lmax)))/2)).astype(int)
-    ls = np.arange( 0, lmax2nlm(lmax), dtype=np.int )-ms*(2*lmax+1-ms)/2
+    ms = (np.ceil(((2*lmax+1)-np.sqrt((2*lmax+1)**2-8*(np.arange( 0, lmax2nlm(lmax) )-lmax)))//2)).astype(int)
+    ls = np.arange( 0, lmax2nlm(lmax), dtype=np.int )-ms*(2*lmax+1-ms)//2
 
     r1 = np.sqrt(0.5)*(rand( lmax2nlm(lmax) ) + 1.j*rand( lmax2nlm(lmax) ))
     r2 = np.sqrt(0.5)*(rand( lmax2nlm(lmax) ) + 1.j*rand( lmax2nlm(lmax) ))
@@ -48,13 +48,13 @@ def nlm2lmax(nlm):
     """ returns the lmax for an array of alm with length nlm. """
 
     lmax = int(np.floor(np.sqrt(2*nlm)-1))
-    assert( (lmax+2)*(lmax+1)/2 == nlm )
+    assert( (lmax+2)*(lmax+1)//2 == nlm )
     return lmax
 
 def lmax2nlm(lmax):
     """ returns the length of the complex alm array required for maximum multipole lmax. """
     
-    return (lmax+1)*(lmax+2)/2
+    return (lmax+1)*(lmax+2)//2
 
 def alm2vlm( glm, clm=None ):
     """ convert alm format -> vlm format coefficients. glm is gradient mode, clm is curl mode. """
@@ -63,16 +63,16 @@ def alm2vlm( glm, clm=None ):
     for l in xrange(0, lmax+1):
         ms = np.arange(1,l+1)
         ret[l*l+l]    = -glm[l]
-        ret[l*l+l+ms] = -glm[ms * (2*lmax+1-ms)/2 + l]
-        ret[l*l+l-ms] = -(-1)**ms * np.conj( glm[ms * (2*lmax+1-ms)/2 + l] )
+        ret[l*l+l+ms] = -glm[ms * (2*lmax+1-ms)//2 + l]
+        ret[l*l+l-ms] = -(-1)**ms * np.conj( glm[ms * (2*lmax+1-ms)//2 + l] )
 
     if clm != None:
         assert( len(clm) == len(glm) )
         for l in xrange(0, lmax+1):
             ms = np.arange(1,l+1)
             ret[l*l+l]    += -1.j * clm[l]
-            ret[l*l+l+ms] += -1.j * clm[ms * (2*lmax+1-ms)/2 + l]
-            ret[l*l+l-ms] += -(-1)**ms * 1.j * np.conj( clm[ms * (2*lmax+1-ms)/2 + l] )
+            ret[l*l+l+ms] += -1.j * clm[ms * (2*lmax+1-ms)//2 + l]
+            ret[l*l+l-ms] += -(-1)**ms * 1.j * np.conj( clm[ms * (2*lmax+1-ms)//2 + l] )
         
     return ret
 
@@ -89,8 +89,8 @@ def vlm2alm( vlm ):
         glm[l] = -vlm[l*l+l].real
         clm[l] = -vlm[l*l+l].imag
 
-        glm[ms * (2*lmax+1-ms)/2 + l] = -0.5  * ( vlm[l*l+l+ms] + (-1)**ms * np.conj( vlm[l*l+l-ms] ) )
-        clm[ms * (2*lmax+1-ms)/2 + l] =  0.5j * ( vlm[l*l+l+ms] - (-1)**ms * np.conj( vlm[l*l+l-ms] ) )
+        glm[ms * (2*lmax+1-ms)//2 + l] = -0.5  * ( vlm[l*l+l+ms] + (-1)**ms * np.conj( vlm[l*l+l-ms] ) )
+        clm[ms * (2*lmax+1-ms)//2 + l] =  0.5j * ( vlm[l*l+l+ms] - (-1)**ms * np.conj( vlm[l*l+l-ms] ) )
     return glm, clm
 
 def alm2rlm(alm):
@@ -105,8 +105,8 @@ def alm2rlm(alm):
 
     rlm[l2s] = alm[ls].real
     for m in xrange(1, lmax+1):
-        rlm[l2s[m:] + 2*m - 1] = alm[m*(2*lmax+1-m)/2 + ls[m:]].real * rt2
-        rlm[l2s[m:] + 2*m + 0] = alm[m*(2*lmax+1-m)/2 + ls[m:]].imag * rt2
+        rlm[l2s[m:] + 2*m - 1] = alm[m*(2*lmax+1-m)//2 + ls[m:]].real * rt2
+        rlm[l2s[m:] + 2*m + 0] = alm[m*(2*lmax+1-m)//2 + ls[m:]].imag * rt2
     return rlm
 
 def rlm2alm(rlm):
@@ -123,5 +123,5 @@ def rlm2alm(rlm):
 
     alm[ls] = rlm[l2s]
     for m in xrange(1, lmax+1):
-        alm[m*(2*lmax+1-m)/2 + ls[m:]] = (rlm[l2s[m:] + 2*m - 1] + 1.j * rlm[l2s[m:] + 2*m + 0]) * ir2
+        alm[m*(2*lmax+1-m)//2 + ls[m:]] = (rlm[l2s[m:] + 2*m - 1] + 1.j * rlm[l2s[m:] + 2*m + 0]) * ir2
     return alm

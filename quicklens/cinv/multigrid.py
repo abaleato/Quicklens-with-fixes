@@ -116,9 +116,9 @@ class pre_op_split():
         teb_low = self.pre_op_low(teb.degrade(2))
         teb_hgh = self.pre_op_hgh(teb)
 
-        teb_hgh.tfft[0:teb_low.nx,0:teb_low.ny/2+1] = teb_low.tfft
-        teb_hgh.efft[0:teb_low.nx,0:teb_low.ny/2+1] = teb_low.efft
-        teb_hgh.bfft[0:teb_low.nx,0:teb_low.ny/2+1] = teb_low.bfft
+        teb_hgh.tfft[0:teb_low.nx,0:teb_low.ny//2+1] = teb_low.tfft
+        teb_hgh.efft[0:teb_low.nx,0:teb_low.ny//2+1] = teb_low.efft
+        teb_hgh.bfft[0:teb_low.nx,0:teb_low.ny//2+1] = teb_low.bfft
         
         return teb_hgh
 

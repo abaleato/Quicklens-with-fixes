@@ -26,6 +26,9 @@ def configuration(parent_package='',top_path=None):
 if __name__ == "__main__":
     from numpy.distutils.core import setup
 
+    os.environ["CC"] = "gcc-9"
+    os.environ["CXX"] = "g++-9"
+    
     try:
        from distutils.command.build_py import build_py_2to3 \
             as build_py

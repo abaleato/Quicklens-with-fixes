@@ -57,18 +57,18 @@ def tebfft(pix, tcl):
     """
     nx, dx, ny, dy = pix.nx, pix.dx, pix.ny, pix.dy
         
-    tfft      = (np.random.standard_normal((ny,nx/2+1)) + 1.j * np.random.standard_normal((ny,nx/2+1))) / np.sqrt(2.)
-    efft      = (np.random.standard_normal((ny,nx/2+1)) + 1.j * np.random.standard_normal((ny,nx/2+1))) / np.sqrt(2.)
-    bfft      = (np.random.standard_normal((ny,nx/2+1)) + 1.j * np.random.standard_normal((ny,nx/2+1))) / np.sqrt(2.)
+    tfft      = (np.random.standard_normal((ny,nx//2+1)) + 1.j * np.random.standard_normal((ny,nx//2+1))) / np.sqrt(2.)
+    efft      = (np.random.standard_normal((ny,nx//2+1)) + 1.j * np.random.standard_normal((ny,nx//2+1))) / np.sqrt(2.)
+    bfft      = (np.random.standard_normal((ny,nx//2+1)) + 1.j * np.random.standard_normal((ny,nx//2+1))) / np.sqrt(2.)
 
     tfft[0,0] = np.sqrt(2.) * np.real(tfft[0,0])
     efft[0,0] = np.sqrt(2.) * np.real(efft[0,0])
     bfft[0,0] = np.sqrt(2.) * np.real(bfft[0,0])
 
     #The following 3 lines were introduced by A.Baleato to fix a bug in the original.
-    tfft[ny/2+1:, 0] = np.conj( tfft[1:ny/2,0][::-1] )
-    efft[ny/2+1:, 0] = np.conj( efft[1:ny/2,0][::-1] )
-    bfft[ny/2+1:, 0] = np.conj( bfft[1:ny/2,0][::-1] )
+    tfft[ny//2+1:, 0] = np.conj( tfft[1:ny//2,0][::-1] )
+    efft[ny//2+1:, 0] = np.conj( efft[1:ny//2,0][::-1] )
+    bfft[ny//2+1:, 0] = np.conj( bfft[1:ny//2,0][::-1] )
 
     teb       = maps.tebfft( nx, dx, [tfft, efft, bfft], ny=ny, dy=dy )
     return spec.clmat_teb(tcl).cholesky() * teb
@@ -81,9 +81,9 @@ def rfft(pix, tcl):
     nx, dx, ny, dy = pix.nx, pix.dx, pix.ny, pix.dy
     
     ret = maps.rfft(nx, dx, ny=ny, dy=dy)
-    ret.fft[:,:] = (np.random.standard_normal((ny,nx/2+1)) + 1.j * np.random.standard_normal((ny,nx/2+1))) / np.sqrt(2.)
+    ret.fft[:,:] = (np.random.standard_normal((ny,nx//2+1)) + 1.j * np.random.standard_normal((ny,nx//2+1))) / np.sqrt(2.)
     ret.fft[0,0] = np.sqrt(2.) * np.real(ret.fft[0,0])
-    ret.fft[ny/2+1:, 0] = np.conj( ret.fft[1:ny/2,0][::-1] )
+    ret.fft[ny//2+1:, 0] = np.conj( ret.fft[1:ny//2,0][::-1] )
 
     ret.fft[:,:] *= np.interp( ret.get_ell().flatten(), np.arange(0,len(tcl)), np.sqrt(tcl), right=0 ).reshape( ret.fft.shape )
     return ret
