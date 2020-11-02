@@ -178,6 +178,65 @@ class library_diag_full_sky(library):
             fl_to_return[0:int(lcut)] = 0
         return #hp.sphtfunc.almxfl(alm_array, fl_to_return)
 
+class library_diag_emp(library):
+    """ ADDED BY ANTON BALEATO LIZANCOS ON 11/11/17. A simple inverse-variance filter which is (nearly) diagonal in Fourier space. the steps are:
+            1) apply a mask to the observed map.
+            2) take the Fourier transform.
+            3) deconvolve the beam+filtering+pixelization transfer function.
+            4) divide by the sky+noise power spectrum in T, E, B for white noise with a given level.
+    """
+    def __init__(self, obs_lib, cl_theory, transf, nlev_t=0., nlev_p=0., mask=None):
+        """ initialize the diagonal filter library.
+                obs_lib = ql.maps.tqumap object
+                cl_theory      = spec.clmat_teb object containing the theory sky power spectra. (lensed is better)
+                transf  = 1d array or maps.tebfft object containing the beam+filtering+pixelization transfer function.
+                (optional) nlev_t = temperature map white noise level to use in filtering (in uK.arcmin).
+                (optional) nlev_p = polarization (q,u) map white noise level to use in filtering (in uK.arcmin).
+                (optional) mask   = 2d matrix or maps.rmap object to use as a mask. defaults to no masking.
+        """
+        self.cl    = cl_theory
+        self.transf = transf
+        self.nlev_t = nlev_t
+        self.nlev_p = nlev_p
+        
+        pix  = ql.maps.pix(obs_lib.nx,obs_lib.dx)
+
+        self.mask   = mask
+
+        if self.mask is None:
+            self.mask = np.ones( (obs_lib.ny, obs_lib.nx) )
+
+        self.nl = ql.spec.cl2tebfft(ql.util.dictobj( {'lmax' : cl_theory.lmax,
+                                                      'cltt' : np.ones(cl_theory.lmax+1) * (nlev_t * np.pi/180./60.)**2,
+                                                      'clee' : np.ones(cl_theory.lmax+1) * (nlev_p * np.pi/180./60.)**2,
+                                                      'clbb' : np.ones(cl_theory.lmax+1) * (nlev_p * np.pi/180./60.)**2} ), pix )
+
+        self.tl = self.transf.inverse()
+        self.fl = (self.cl + (self.tl * self.tl * self.nl)).inverse()
+        
+        super(library_diag_emp, self).__init__(obs_lib)
+
+    def hashdict(self):
+        ret = { 'cl'     : self.cl.hashdict(),
+                'transf' : self.transf.hashdict(),
+                'nlev_t' : self.nlev_t,
+                'nlev_p' : self.nlev_p,
+                'super'  : super(library_diag_emp, self).hashdict() }
+        if type(self.mask) == np.ndarray:
+            ret['mask'] = hashlib.sha1(self.mask.view(np.uint8)).hexdigest()
+        else:
+            ret['mask'] = self.mask.hashdict()
+
+    def get_fmask(self):
+        return self.mask
+            
+    def get_fl(self):
+        return self.fl
+
+    def get_sim_teb(self, idx=0):
+        ret = (self.obs_lib* self.mask).get_teb() * self.tl
+        return ret * self.get_fl()
+
 class library_l_mask(library):
     """ a simple wrapper around another inverse-variance filter library which applies a multipole mask in Fourier space. """
     def __init__(self, ivf_lib, lmin=None, lxmin=None, lxmax=None, lmax=None, lymin=None, lymax=None):
